@@ -402,22 +402,33 @@ def generate_word_document(resume, experience_list, education_list, skill_list, 
     response['Content-Disposition'] = f'attachment; filename="Polished_Resume_{resume.title}.docx"'
     return response
 
+
+
+
 def call_gemini_api(summary, resume_context):
     """
-    Use Google's Gemini API to enhance resume summary
+    Use Google's Gemini API to enhance resume summary using Gemini 2.0 Flash model
     """
     import google.generativeai as genai
+    import random
     
     # Set up the API key
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-  # Better to use env variables
+    if not GEMINI_API_KEY:
+        logger.error("GEMINI_API_KEY environment variable is not set")
+        return generate_fallback_summary(resume_context)
+        
+    # Configure the API
     genai.configure(api_key=GEMINI_API_KEY)
     
-    # Format the resume context into a readable format - FIX THE IS_CURRENT ISSUE
+    # Log API key status
+    logger.debug(f"Gemini API key configured: {'Yes' if GEMINI_API_KEY else 'No'}")
+    
+    # Format resume context
     experience_text = "\n".join([
         f"- {exp['position']} at {exp['company']} ({exp['start_date']} - "
-        f"{'Present' if exp.get('is_current', False) else exp.get('end_date', 'Not specified')})" 
+        f"{'Present' if exp.get('is_current', False) else exp.get('end_date', 'Not specified')})\n"
+        f"  Description: {exp['description']}" 
         for exp in resume_context['experiences'][:3]
     ])
     
@@ -428,51 +439,115 @@ def call_gemini_api(summary, resume_context):
         for edu in resume_context['education'][:2]
     ])
     
-    # Create the prompt
+    # Create unique identifier
+    unique_id = random.randint(1000, 9999)
+    
+    # Create prompt
     prompt = f"""
-    Task: Enhance the following resume professional summary.
-    
-    Current summary: {summary}
-    
-    Experience:
-    {experience_text}
-    
-    Skills: {skills_text}
-    
-    Education:
-    {education_text}
-    
-    Instructions:
-    1. Make the summary concise (maximum 3-4 sentences)
-    2. Highlight key professional strengths
-    3. Mention relevant skills
-    4. Focus on achievements and value proposition
-    5. Use action verbs and professional language
-    6. Avoid first person pronouns
-    
-    Enhanced Professional Summary:
-    """
+Generate a professional resume summary for someone with the following background:
+
+Experience:
+{experience_text}
+
+Skills: {skills_text}
+
+Education:
+{education_text}
+
+Current summary: {summary}
+
+IMPORTANT: Respond ONLY with the finished summary in 3-4 sentences. DO NOT include explanations, options, or meta-commentary. DO NOT refer to the resume by number or ID. DO NOT ask questions. Just write a polished, professional summary that would appear at the top of a resume.
+"""
     
     try:
-        # Use Gemini Pro model (free tier)
-        model = genai.GenerativeModel('gemini-pro')
+        # Use Gemini 2.0 Flash model (based on your API key setup)
+        logger.info("Using gemini-2.0-flash model")
+        model = genai.GenerativeModel("gemini-2.0-flash")
         
-        # Generate content
-        response = model.generate_content(prompt)
-        
-        # Extract the enhanced summary
-        enhanced_summary = response.text.strip()
-        
-        # If the response is empty, use fallback
-        if not enhanced_summary:
-            return generate_fallback_summary(resume_context)
+        try:
+            # Try with basic configuration
+            generation_config = {
+                "temperature": 0.9,
+                "top_p": 0.95,
+                "max_output_tokens": 250,
+            }
             
-        return enhanced_summary
+            response = model.generate_content(prompt, generation_config=generation_config)
+            enhanced_summary = response.text.strip()
+            
+            # If we get a good response, return it
+            if enhanced_summary:
+                logger.info(f"Generated summary: {enhanced_summary[:100]}...")
+                return enhanced_summary
+                
+        except Exception as first_error:
+            logger.warning(f"First attempt failed: {str(first_error)}")
+            
+            # Try with simpler configuration
+            try:
+                response = model.generate_content(prompt)
+                enhanced_summary = response.text.strip()
+                
+                if enhanced_summary:
+                    logger.info(f"Generated summary (second attempt): {enhanced_summary[:100]}...")
+                    return enhanced_summary
+                    
+            except Exception as second_error:
+                logger.warning(f"Second attempt failed: {str(second_error)}")
+                
+                # One last attempt with direct API call if library is failing
+                try:
+                    import requests
+                    import json
+                    
+                    api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+                    headers = {
+                        "Content-Type": "application/json"
+                    }
+                    
+                    data = {
+                        "contents": [
+                            {
+                                "parts": [
+                                    {
+                                        "text": prompt
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                    
+                    params = {
+                        "key": GEMINI_API_KEY
+                    }
+                    
+                    response = requests.post(api_url, headers=headers, json=data, params=params)
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        if "candidates" in result and len(result["candidates"]) > 0:
+                            if "content" in result["candidates"][0] and "parts" in result["candidates"][0]["content"]:
+                                parts = result["candidates"][0]["content"]["parts"]
+                                if len(parts) > 0 and "text" in parts[0]:
+                                    enhanced_summary = parts[0]["text"].strip()
+                                    logger.info(f"Generated summary (direct API): {enhanced_summary[:100]}...")
+                                    return enhanced_summary
+                    
+                    logger.warning(f"Direct API call failed with status: {response.status_code}")
+                    
+                except Exception as third_error:
+                    logger.error(f"All generation attempts failed: {str(third_error)}")
         
-    except Exception as e:
-        logger.error(f"Error calling Gemini API: {str(e)}")
-        # Try fallback summary generation
+        # If we reach here, all attempts failed
+        logger.warning("All generation attempts failed, using fallback")
         return generate_fallback_summary(resume_context)
+            
+    except Exception as e:
+        logger.error(f"Error setting up Gemini API: {str(e)}")
+        return generate_fallback_summary(resume_context)
+
+
+
 
 def generate_fallback_summary(resume_context):
     """Generate a fallback summary when API calls fail"""
