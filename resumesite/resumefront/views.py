@@ -8,19 +8,22 @@ from django.http import JsonResponse
 from docx import Document
 from docx.shared import Pt
 from io import BytesIO
-import openai
 import logging
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 from django.http import HttpResponse
 
-# openai.api_key = "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"
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-HF_API_TOKEN = "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"
 
-# client = openai.OpenAI(api_key="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")
+
 
 
 from .models import (
@@ -406,7 +409,9 @@ def call_gemini_api(summary, resume_context):
     import google.generativeai as genai
     
     # Set up the API key
-    GEMINI_API_KEY = "AIzaSyCE1YLLPqKh8doI6NVMSn087CqKp2EVKW0"  # Better to use env variables
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+  # Better to use env variables
     genai.configure(api_key=GEMINI_API_KEY)
     
     # Format the resume context into a readable format - FIX THE IS_CURRENT ISSUE
