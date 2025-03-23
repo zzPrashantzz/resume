@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - Resume Builder{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-primary">My Resumes</h2>
+            <a href="{% url 'resume_create' %}" class="btn btn-primary">Create New Resume</a>
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for resume in resumes %}
+            <div class="col">
+                <div class="resume-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">{{ resume.title }}</h5>
+                        <p class="card-text mb-3">{{ resume.summary|truncatewords:30 }}</p>
+                        <p class="template-label">Template: {{ resume.get_template_display }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100">
+                            <a href="{% url 'resume_detail' resume.pk %}" class="btn btn-outline-primary">View</a>
+                            <a href="{% url 'resume_edit' resume.pk %}" class="btn btn-outline-secondary">Edit</a>
+                            <a href="{% url 'resume_delete' resume.pk %}" class="btn btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state text-center py-5">
+                    <p class="lead mb-4">You haven't created any resumes yet.</p>
+                    <a href="{% url 'resume_create' %}" class="btn btn-primary btn-lg">Create Your First Resume</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-wrapper {
+    background: linear-gradient(135deg, rgba(206, 219, 179, 0.3) 0%, rgba(255, 224, 233, 0.3) 100%);
+    min-height: calc(100vh - 76px);
+}
+
+.resume-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid rgba(190, 154, 96, 0.2);
+    box-shadow: 0 4px 6px rgba(67, 67, 67, 0.05);
+    transition: all 0.3s ease;
+}
+
+.resume-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(67, 67, 67, 0.1);
+    border-color: var(--primary-color);
+}
+
+.card-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.card-text {
+    color: var(--dark-text);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.template-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+.card-footer {
+    border-top: 1px solid rgba(190, 154, 96, 0.2);
+    padding: 1rem;
+}
+
+.btn-group .btn {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.empty-state {
+    background: #fff;
+    border-radius: 12px;
+    padding: 3rem;
+    box-shadow: 0 4px 6px rgba(67, 67, 67, 0.05);
+}
+
+.empty-state .lead {
+    color: var(--dark-text);
+}
+</style>
+{% endblock %}

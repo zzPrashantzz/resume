@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Home - Resume Builder
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center position-relative">
+    <div class="container px-4 py-5">
+        <h1 class="display-2 fw-bold text-white mb-4">Create Your Future with AI-Powered Resumes</h1>
+        <div class="col-lg-8 mx-auto">
+            <p class="lead mb-5 text-white-50">
+                Transform your career journey with our intelligent resume builder. 
+                Craft compelling, professional resumes that capture attention and showcase your true potential.
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Get Started</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-5">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="light-section py-6">
+    <div class="container">
+        <div class="row g-4 py-5">
+            <div class="col-md-4">
+                <div class="feature-card p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-robot fa-2x"></i>
+                    </div>
+                    <h3>AI-Powered</h3>
+                    <p>Leverage advanced AI technology to create perfectly tailored resumes that highlight your strengths.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-wand-magic-sparkles fa-2x"></i>
+                    </div>
+                    <h3>Professional Templates</h3>
+                    <p>Choose from a variety of ATS-friendly templates designed to make your resume stand out.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-gauge-high fa-2x"></i>
+                    </div>
+                    <h3>Quick & Easy</h3>
+                    <p>Create your professional resume in minutes with our intuitive and user-friendly interface.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section py-6 text-center">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h2 class="display-4 fw-bold text-white">10K+</h2>
+                <p class="text-white-50">Resumes Created</p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="display-4 fw-bold text-white">89%</h2>
+                <p class="text-white-50">Success Rate</p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="display-4 fw-bold text-white">24/7</h2>
+                <p class="text-white-50">AI Support</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    background-color: #111827;
+    color: #fff;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    padding: 120px 0;
+    color: white;
+}
+
+.light-section {
+    background-color: #fff;
+}
+
+.accent-section {
+    background-color: var(--accent-bg);
+}
+
+.py-6 {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.feature-card {
+    background: #fff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: var(--dark-text);
+    border: 1px solid var(--border-color);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.feature-icon {
+    color: var(--primary-color);
+}
+
+.stats-section {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.stats-section h2 {
+    color: #fff;
+}
+
+.stats-section p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.btn-primary {
+    background: #3b82f6;
+    border: none;
+    padding: 12px 30px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}
+
+.btn-outline-light {
+    padding: 12px 30px;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-outline-light:hover {
+    transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+</style>
+{% endblock %}
